@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STREET DYNASTY</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Bebas Neue', 'sans-serif'],
+          condensed: ['Barlow Condensed', 'sans-serif'],
+          body: ['Barlow', 'sans-serif'],
+        },
+        colors: {
+          dynasty: {
+            black: '#080808',
+            dark: '#0f0f0f',
+            card: '#141414',
+            border: '#1e1e1e',
+            muted: '#2a2a2a',
+            gold: '#c9a84c',
+            'gold-light': '#e8c96e',
+            'gold-dim': '#8a6e2f',
+            red: '#c0392b',
+            'red-hot': '#e74c3c',
+            text: '#f0ede8',
+            muted_text: '#888888',
+            subtle: '#3a3a3a',
+          }
+        },
+        letterSpacing: {
+          ultra: '0.3em',
+          mega: '0.5em',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root {
+    --grain-opacity: 0.035;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: #080808;
+    color: #f0ede8;
+    font-family: 'Barlow', sans-serif;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 10px; height: 10px;
+    background: #c9a84c;
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, background 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(201,168,76,0.5);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.25s ease;
+    transform: translate(-50%, -50%);
+  }
+  body:has(a:hover) .cursor,
+  body:has(button:hover) .cursor,
+  body:has(.product-card:hover) .cursor {
+    transform: translate(-50%, -50%) scale(2.5);
+    background: #e8c96e;
+  }
+  body:has(a:hover) .cursor-ring,
+  body:has(button:hover) .cursor-ring,
+  body:has(.product-card:hover) .cursor-ring {
+    width: 60px; height: 60px;
+    border-color: rgba(201,168,76,0.2);
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: var(--grain-opacity);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: #0f0f0f; }
+  ::-webkit-scrollbar-thumb { background: #c9a84c; }
+
+  /* Hero */
+  .hero-bg {
+    background:
+      radial-gradient(ellipse 60% 80% at 70% 50%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(192,57,43,0.04) 0%, transparent 60%),
+      #080808;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 16vw, 16rem);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    background: linear-gradient(160deg, #f0ede8 0%, #c9a84c 40%, #8a6e2f 70%, #3a3020 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+  }
+
+  /* Marquee */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 22s linear infinite;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Product card */
+  .product-card {
+    position: relative;
+    overflow: hidden;
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    transition: border-color 0.4s ease, transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .product-card:hover {
+    border-color: #c9a84c;
+    transform: translateY(-4px);
+  }
+
+  .card-img-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background: #1a1a1a;
+  }
+
+  .card-front, .card-back {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1), transform 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .card-front { opacity: 1; transform: scale(1); }
+  .card-back  { opacity: 0; transform: scale(1.05); }
+
+  .product-card:hover .card-front { opacity: 0; transform: scale(1.05); }
+  .product-card:hover .card-back  { opacity: 1; transform: scale(1); }
+
+  .card-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    z-index: 2;
+  }
+
+  .hover-cta {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(201,168,76,0.95), rgba(201,168,76,0.7));
+    color: #080808;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 14px;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 3;
+  }
+  .product-card:hover .hover-cta { transform: translateY(0); }
+
+  /* Gold line */
+  .gold-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #c9a84c, transparent);
+  }
+
+  /* Nav */
+  .nav-link {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #888;
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover { color: #c9a84c; }
+
+  /* Section label */
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: #c9a84c;
+  }
+
+  /* Drop shadow on cards */
+  .product-card:hover {
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.3);
+  }
+
+  /* Skeleton graphic patterns for product images */
+  .img-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Category tab */
+  .cat-tab {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    padding: 10px 28px;
+    border: 1px solid #2a2a2a;
+    color: #888;
+    transition: all 0.25s ease;
+    cursor: none;
+  }
+  .cat-tab:hover, .cat-tab.active {
+    border-color: #c9a84c;
+    color: #c9a84c;
+    background: rgba(201,168,76,0.06);
+  }
+
+  /* Size bubble */
+  .size-dot {
+    width: 28px; height: 28px;
+    border: 1px solid #2a2a2a;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0.05em;
+  }
+  .size-dot:hover {
+    border-color: #c9a84c;
+    color: #c9a84c;
+  }
+
+  /* Stagger animation on load */
+  .stagger-in {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  /* Banner strip */
+  .promo-strip {
+    background: linear-gradient(135deg, #c9a84c 0%, #8a6e2f 50%, #c9a84c 100%);
+    background-size: 200% 100%;
+    animation: sheen 4s ease infinite;
+  }
+  @keyframes sheen {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+  }
+
+  /* Cart icon pulse */
+  .cart-pulse {
+    animation: cartBeat 2.5s ease-in-out infinite;
+  }
+  @keyframes cartBeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- PROMO STRIP -->
+<div class="promo-strip py-2 px-4 text-center">
+  <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:0.35em;font-weight:700;text-transform:uppercase;color:#080808;">
+    FREE WORLDWIDE SHIPPING ON ORDERS OVER $150 &nbsp;·&nbsp; NEW DROP: DYNASTY VOL.III NOW LIVE
+  </span>
+</div>
+
+<!-- NAV -->
+<nav class="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 border-b border-dynasty-border" style="background:rgba(8,8,8,0.92);backdrop-filter:blur(20px);">
+  <div class="flex items-center gap-8">
+    <a href="#" class="nav-link">Collections</a>
+    <a href="#" class="nav-link hidden md:block">Lookbook</a>
+    <a href="#" class="nav-link hidden md:block">About</a>
+  </div>
+
+  <!-- Logo -->
+  <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.15em;background:linear-gradient(135deg,#f0ede8,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+      STREET DYNASTY
+    </div>
+  </div>
+
+  <div class="flex items-center gap-6">
+    <!-- Search -->
+    <button style="cursor:none;" class="nav-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <!-- Cart -->
+    <button class="cart-pulse nav-link relative" style="cursor:none;color:#f0ede8;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span class="absolute -top-1 -right-2 w-4 h-4 rounded-full text-dynasty-black flex items-center justify-center" style="background:#c9a84c;font-family:'Barlow Condensed',sans-serif;font-size:0.55rem;font-weight:700;">3</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-bg relative min-h-screen flex flex-col justify-center overflow-hidden px-6 md:px-12" style="padding-top:6rem;padding-bottom:4rem;">
+
+  <!-- Decorative vertical lines -->
+  <div class="absolute inset-0 pointer-events-none" style="background-image:repeating-linear-gradient(90deg,rgba(201,168,76,0.03) 0px,transparent 1px,transparent 160px);"></div>
+
+  <!-- Big label -->
+  <div class="section-label mb-6 stagger-in" style="animation-delay:0.1s;">Est. 2019 &nbsp;·&nbsp; Vol. III Collection</div>
+
+  <!-- Main Title -->
+  <h1 class="hero-title stagger-in" style="animation-delay:0.2s;">
+    STREET<br>DYNASTY
+  </h1>
+
+  <!-- Tagline row -->
+  <div class="flex flex-col md:flex-row md:items-end gap-6 mt-8">
+    <p class="hero-sub text-dynasty-muted_text text-xs stagger-in" style="animation-delay:0.4s;">
+      Crafted for the<br>streets. Built to last.
+    </p>
+    <div class="gold-line flex-1 hidden md:block" style="margin-bottom:4px;"></div>
+    <div class="stagger-in" style="animation-delay:0.5s;">
+      <a href="#shop" style="cursor:none;">
+        <button class="flex items-center gap-4 group" style="background:none;border:none;padding:0;cursor:none;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;letter-spacing:0.3em;font-weight:700;text-transform:uppercase;color:#c9a84c;">
+            SHOP THE DROP
+          </span>
+          <span class="w-10 h-10 rounded-full border border-dynasty-gold flex items-center justify-center group-hover:bg-dynasty-gold group-hover:text-dynasty-black transition-all duration-300" style="color:#c9a84c;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </button>
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="flex gap-12 mt-16 stagger-in" style="animation-delay:0.6s;">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#c9a84c;line-height:1;">48K</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:#555;text-transform:uppercase;">Community</div>
+    </div>
+    <div style="width:1px;background:#1e1e1e;"></div>
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#c9a84c;line-height:1;">12</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:#555;text-transform:uppercase;">Drops</div>
+    </div>
+    <div style="width:1px;background:#1e1e1e;"></div>
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#c9a84c;line-height:1;">6</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:#555;text-transform:uppercase;">Cities</div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="absolute bottom-8 right-12 hidden md:flex flex-col items-center gap-3" style="opacity:0.4;">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:0.35em;text-transform:uppercase;writing-mode:vertical-rl;">Scroll</span>
+    <div style="width:1px;height:40px;background:linear-gradient(to bottom,#c9a84c,transparent);"></div>
+  </div>
+
+  <!-- Floating tag -->
+  <div class="absolute top-24 right-8 md:right-24 hidden md:block stagger-in" style="animation-delay:0.8s;">
+    <div style="border:1px solid #1e1e1e;padding:16px 20px;background:rgba(20,20,20,0.7);backdrop-filter:blur(10px);">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;letter-spacing:0.3em;color:#555;text-transform:uppercase;margin-bottom:4px;">New Drop</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#f0ede8;letter-spacing:0.1em;">DYNASTY VOL.III</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;color:#c9a84c;letter-spacing:0.1em;margin-top:6px;">FROM $89</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="overflow-hidden border-y border-dynasty-border py-4" style="background:#0f0f0f;">
+  <div class="marquee-track">
+    <span class="contents" style="font-family:'Bebas Neue',sans-serif;letter-spacing:0.15em;color:#2a2a2a;font-size:1.4rem;">
+      STREET DYNASTY &nbsp;&nbsp;·&nbsp;&nbsp; TRACKSUITS &nbsp;&nbsp;·&nbsp;&nbsp; T-SHIRTS &nbsp;&nbsp;·&nbsp;&nbsp; VOL.III DROP &nbsp;&nbsp;·&nbsp;&nbsp; DYNASTY BRAND &nbsp;&nbsp;·&nbsp;&nbsp; STREET CULTURE &nbsp;&nbsp;·&nbsp;&nbsp; URBAN LEGACY &nbsp;&nbsp;·&nbsp;&nbsp; CRAFTED FOR THE STREETS &nbsp;&nbsp;·&nbsp;&nbsp;
+    </span>
+    <span class="contents" style="font-family:'Bebas Neue',sans-serif;letter-spacing:0.15em;color:#2a2a2a;font-size:1.4rem;">
+      STREET DYNASTY &nbsp;&nbsp;·&nbsp;&nbsp; TRACKSUITS &nbsp;&nbsp;·&nbsp;&nbsp; T-SHIRTS &nbsp;&nbsp;·&nbsp;&nbsp; VOL.III DROP &nbsp;&nbsp;·&nbsp;&nbsp; DYNASTY BRAND &nbsp;&nbsp;·&nbsp;&nbsp; STREET CULTURE &nbsp;&nbsp;·&nbsp;&nbsp; URBAN LEGACY &nbsp;&nbsp;·&nbsp;&nbsp; CRAFTED FOR THE STREETS &nbsp;&nbsp;·&nbsp;&nbsp;
+    </span>
+  </div>
+</div>
+
+<!-- SHOP SECTION -->
+<section id="shop" class="px-6 md:px-12 py-20">
+
+  <!-- Section header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div>
+      <div class="section-label mb-3">Vol. III Collection</div>
+      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);line-height:0.9;letter-spacing:0.02em;color:#f0ede8;">
+        THE<br>COLLECTION
+      </h2>
+    </div>
+    <p style="font-family:'Barlow',sans-serif;font-size:0.85rem;color:#555;max-width:320px;line-height:1.7;">
+      Engineered for movement. Designed for presence. Every piece carries the DNA of the streets.
+    </p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex gap-2 mb-10 flex-wrap">
+    <button class="cat-tab active" onclick="filterProducts('all', this)">All Pieces</button>
+    <button class="cat-tab" onclick="filterProducts('tracksuit', this)">Tracksuits</button>
+    <button class="cat-tab" onclick="filterProducts('tshirt', this)">T-Shirts</button>
+    <button class="cat-tab" onclick="filterProducts('limited', this)">Limited</button>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" id="productGrid">
+
+    <!-- Product 1: Tracksuit - Onyx -->
+    <div class="product-card stagger-in" data-category="tracksuit">
+      <div class="card-img-wrap">
+        <!-- Front -->
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#111"/>
+            <!-- tracksuit front silhouette -->
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>
+            <path d="M100 60 Q150 80 200 60" stroke="#c9a84c" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+            <!-- Dynasty logo front -->
+            <text x="150" y="200" text-anchor="middle" font-family="serif" font-size="11" fill="#c9a84c" letter-spacing="3">SD</text>
+            <line x1="120" y1="207" x2="180" y2="207" stroke="#c9a84c" stroke-width="0.5" opacity="0.5"/>
+            <!-- Zip line -->
+            <line x1="150" y1="70" x2="150" y2="180" stroke="#333" stroke-width="2"/>
+            <rect x="147" y="68" width="6" height="8" rx="1" fill="#444"/>
+            <!-- Side stripes -->
+            <line x1="91" y1="160" x2="91" y2="340" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+            <line x1="209" y1="160" x2="209" y2="340" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+          </svg>
+        </div>
+        <!-- Back -->
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#111"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>
+            <!-- Back graphic: large dynasty text -->
+            <text x="150" y="165" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="bold" fill="none" stroke="#c9a84c" stroke-width="0.8" letter-spacing="2" opacity="0.9">DYNASTY</text>
+            <text x="150" y="188" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#888" letter-spacing="5">STREET CULTURE</text>
+            <!-- Dragon/wing ornament -->
+            <path d="M110 200 Q130 185 150 195 Q170 185 190 200" stroke="#c9a84c" stroke-width="1" fill="none" opacity="0.6"/>
+            <path d="M115 195 Q130 178 150 190 Q170 178 185 195" stroke="#c9a84c" stroke-width="0.5" fill="none" opacity="0.3"/>
+            <text x="150" y="215" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#555" letter-spacing="3">VOL.III · 2025</text>
+            <!-- Side stripes -->
+            <line x1="91" y1="160" x2="91" y2="340" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+            <line x1="209" y1="160" x2="209" y2="340" stroke="#c9a84c" stroke-width="1" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(8,8,8,0.85);border:1px solid #c9a84c;color:#c9a84c;">NEW</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">Tracksuit</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">ONYX SET</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$149</div>
+          <div class="flex gap-1">
+            <div class="size-dot">S</div>
+            <div class="size-dot">M</div>
+            <div class="size-dot">L</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 2: T-Shirt -->
+    <div class="product-card stagger-in" data-category="tshirt" style="animation-delay:0.1s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0d0d0d"/>
+            <!-- T-shirt silhouette -->
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#1a1a1a" stroke="#252525" stroke-width="1"/>
+            <!-- Front chest graphic -->
+            <text x="150" y="185" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#c9a84c" letter-spacing="4">STREET</text>
+            <line x1="115" y1="192" x2="185" y2="192" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+            <text x="150" y="205" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="bold" fill="#c9a84c" letter-spacing="4">DYNASTY</text>
+            <!-- Small crown icon -->
+            <path d="M140 218 L150 210 L160 218 Z" fill="#c9a84c" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0d0d0d"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#1a1a1a" stroke="#252525" stroke-width="1"/>
+            <!-- Large back graphic -->
+            <circle cx="150" cy="195" r="45" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.25"/>
+            <circle cx="150" cy="195" r="35" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.15"/>
+            <text x="150" y="186" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#c9a84c" letter-spacing="1" opacity="0.95">SD</text>
+            <text x="150" y="205" text-anchor="middle" font-family="sans-serif" font-size="6.5" fill="#666" letter-spacing="4">DYNASTY BRAND</text>
+            <text x="150" y="225" text-anchor="middle" font-family="sans-serif" font-size="6" fill="#444" letter-spacing="3">EST. 2019</text>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(192,57,43,0.9);color:#fff;border:none;">HOT</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">T-Shirt</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">CROWN TEE</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$59</div>
+          <div class="flex gap-1">
+            <div class="size-dot">XS</div>
+            <div class="size-dot">S</div>
+            <div class="size-dot">M</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 3: Limited Tracksuit -->
+    <div class="product-card stagger-in" data-category="tracksuit limited" style="animation-delay:0.2s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0e0a04"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#1a1208" stroke="#3d2e0a" stroke-width="1"/>
+            <!-- Gold panels -->
+            <rect x="91" y="160" width="12" height="180" fill="#c9a84c" opacity="0.15"/>
+            <rect x="197" y="160" width="12" height="180" fill="#c9a84c" opacity="0.15"/>
+            <text x="150" y="200" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#c9a84c" letter-spacing="4" opacity="0.9">SD GOLD</text>
+            <path d="M125 207 L150 200 L175 207" stroke="#c9a84c" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <line x1="130" y1="212" x2="170" y2="212" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+            <!-- Zip -->
+            <line x1="150" y1="70" x2="150" y2="180" stroke="#c9a84c" stroke-width="1.5" opacity="0.5"/>
+            <rect x="147" y="68" width="6" height="8" rx="1" fill="#c9a84c" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0e0a04"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#1a1208" stroke="#3d2e0a" stroke-width="1"/>
+            <!-- Gold ornate back graphic -->
+            <path d="M150 140 L165 160 L185 160 L170 175 L175 195 L150 183 L125 195 L130 175 L115 160 L135 160 Z" fill="none" stroke="#c9a84c" stroke-width="1" opacity="0.8"/>
+            <text x="150" y="222" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="none" stroke="#c9a84c" stroke-width="0.6" letter-spacing="3" opacity="0.9">DYNASTY</text>
+            <text x="150" y="238" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8a6e2f" letter-spacing="5">GOLD EDITION</text>
+            <text x="150" y="254" text-anchor="middle" font-family="sans-serif" font-size="6" fill="#555" letter-spacing="2">LIMITED · 50 PIECES</text>
+            <!-- Gold panels -->
+            <rect x="91" y="160" width="12" height="180" fill="#c9a84c" opacity="0.12"/>
+            <rect x="197" y="160" width="12" height="180" fill="#c9a84c" opacity="0.12"/>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:linear-gradient(135deg,#c9a84c,#8a6e2f);color:#080808;font-weight:800;">LTD</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">Limited · Tracksuit</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">GOLD EDITION</div>
+        <div class="flex items-center justify-between">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$229</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:#c0392b;letter-spacing:0.1em;">12 LEFT</div>
+          </div>
+          <div class="flex gap-1">
+            <div class="size-dot">M</div>
+            <div class="size-dot">L</div>
+            <div class="size-dot">XL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 4: T-Shirt -->
+    <div class="product-card stagger-in" data-category="tshirt" style="animation-delay:0.3s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0f0f0f"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#151515" stroke="#222" stroke-width="1"/>
+            <!-- Graphic - abstract city skyline -->
+            <path d="M100 230 L100 210 L110 210 L110 200 L120 200 L120 210 L130 210 L130 195 L140 195 L140 210 L150 210 L150 190 L155 180 L160 190 L160 210 L170 210 L170 200 L180 200 L180 215 L190 215 L190 210 L200 210 L200 230 Z" fill="#c9a84c" opacity="0.15"/>
+            <path d="M100 230 L100 210 L110 210 L110 200 L120 200 L120 210 L130 210 L130 195 L140 195 L140 210 L150 210 L150 190 L155 180 L160 190 L160 210 L170 210 L170 200 L180 200 L180 215 L190 215 L190 210 L200 210 L200 230 Z" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.7"/>
+            <text x="150" y="165" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#888" letter-spacing="4">STREET</text>
+            <text x="150" y="177" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#888" letter-spacing="4">DYNASTY</text>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0f0f0f"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#151515" stroke="#222" stroke-width="1"/>
+            <!-- Back - large city graphic -->
+            <path d="M90 250 L90 210 L100 210 L100 190 L112 190 L112 175 L122 175 L122 190 L132 190 L132 165 L142 165 L142 190 L148 190 L148 150 L152 140 L156 150 L156 190 L162 190 L162 170 L172 170 L172 190 L182 190 L182 200 L192 200 L192 220 L200 220 L200 210 L210 210 L210 250 Z" fill="#c9a84c" opacity="0.1"/>
+            <path d="M90 250 L90 210 L100 210 L100 190 L112 190 L112 175 L122 175 L122 190 L132 190 L132 165 L142 165 L142 190 L148 190 L148 150 L152 140 L156 150 L156 190 L162 190 L162 170 L172 170 L172 190 L182 190 L182 200 L192 200 L192 220 L200 220 L200 210 L210 210 L210 250 Z" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.8"/>
+            <text x="150" y="280" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#666" letter-spacing="4">DYNASTY BRAND</text>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(8,8,8,0.85);border:1px solid #333;color:#888;">CORE</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">T-Shirt</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">SKYLINE TEE</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$65</div>
+          <div class="flex gap-1">
+            <div class="size-dot">S</div>
+            <div class="size-dot">M</div>
+            <div class="size-dot">L</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 5: Tracksuit Shadow -->
+    <div class="product-card stagger-in" data-category="tracksuit" style="animation-delay:0.1s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0c0c14"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#10101a" stroke="#1e1e30" stroke-width="1"/>
+            <!-- Subtle grid pattern -->
+            <line x1="90" y1="160" x2="210" y2="160" stroke="#1e1e30" stroke-width="0.5"/>
+            <line x1="90" y1="200" x2="210" y2="200" stroke="#1e1e30" stroke-width="0.5"/>
+            <line x1="90" y1="240" x2="210" y2="240" stroke="#1e1e30" stroke-width="0.5"/>
+            <line x1="90" y1="280" x2="210" y2="280" stroke="#1e1e30" stroke-width="0.5"/>
+            <line x1="130" y1="160" x2="130" y2="340" stroke="#1e1e30" stroke-width="0.5"/>
+            <line x1="170" y1="160" x2="170" y2="340" stroke="#1e1e30" stroke-width="0.5"/>
+            <!-- Chest emblem -->
+            <circle cx="150" cy="175" r="15" fill="none" stroke="#3a3a5e" stroke-width="1"/>
+            <text x="150" y="179" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#5a5a8e" letter-spacing="1" font-weight="bold">SD</text>
+            <line x1="150" y1="70" x2="150" y2="158" stroke="#2a2a4a" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0c0c14"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#10101a" stroke="#1e1e30" stroke-width="1"/>
+            <!-- Back large graphic: shadow theme -->
+            <text x="150" y="175" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="bold" fill="none" stroke="#3a3a7e" stroke-width="0.8" letter-spacing="2" opacity="0.9">SHADOW</text>
+            <text x="150" y="192" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#5a5a8e" letter-spacing="5">DYNASTY</text>
+            <!-- Wing motif -->
+            <path d="M110 205 Q130 195 150 202 Q170 195 190 205" stroke="#5a5a8e" stroke-width="1" fill="none" opacity="0.7"/>
+            <text x="150" y="220" text-anchor="middle" font-family="sans-serif" font-size="6" fill="#3a3a5e" letter-spacing="3">VOL.III · LIMITED</text>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(8,8,8,0.85);border:1px solid #2a2a4a;color:#5a5a8e;">SHADOW</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">Tracksuit</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">SHADOW SET</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$159</div>
+          <div class="flex gap-1">
+            <div class="size-dot">S</div>
+            <div class="size-dot">M</div>
+            <div class="size-dot">XL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 6: T-Shirt Arch -->
+    <div class="product-card stagger-in" data-category="tshirt limited" style="animation-delay:0.2s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#140808"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#1a0a0a" stroke="#2a1010" stroke-width="1"/>
+            <!-- Arch text graphic -->
+            <path id="arc1" d="M110 220 A55 55 0 0 1 190 220" fill="none"/>
+            <text font-family="sans-serif" font-size="8.5" fill="#c0392b" letter-spacing="5">
+              <textPath href="#arc1">STREET  DYNASTY</textPath>
+            </text>
+            <circle cx="150" cy="185" r="28" fill="none" stroke="#c0392b" stroke-width="0.8" opacity="0.4"/>
+            <text x="150" y="189" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#c0392b" opacity="0.8" font-weight="bold">SD</text>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#140808"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#1a0a0a" stroke="#2a1010" stroke-width="1"/>
+            <!-- Back: large flame/crown -->
+            <path d="M150 150 Q155 165 165 160 Q158 178 165 185 Q155 178 150 192 Q145 178 135 185 Q142 178 135 160 Q145 165 150 150Z" fill="#c0392b" opacity="0.7"/>
+            <text x="150" y="218" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="none" stroke="#c0392b" stroke-width="0.7" letter-spacing="2">FIRE TEE</text>
+            <text x="150" y="234" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#8a3020" letter-spacing="4">STREET DYNASTY</text>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(192,57,43,0.9);color:#fff;border:none;">FIRE</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">T-Shirt · Limited</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">FIRE TEE</div>
+        <div class="flex items-center justify-between">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$79</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;color:#c0392b;letter-spacing:0.1em;">8 LEFT</div>
+          </div>
+          <div class="flex gap-1">
+            <div class="size-dot">S</div>
+            <div class="size-dot">L</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 7: Tracksuit -->
+    <div class="product-card stagger-in" data-category="tracksuit" style="animation-delay:0.3s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0a1008"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#0c1408" stroke="#1a2e12" stroke-width="1"/>
+            <!-- Forest/moss green with gold accents -->
+            <line x1="91" y1="160" x2="91" y2="340" stroke="#c9a84c" stroke-width="2" opacity="0.4"/>
+            <line x1="209" y1="160" x2="209" y2="340" stroke="#c9a84c" stroke-width="2" opacity="0.4"/>
+            <rect x="91" y="160" width="8" height="180" fill="#c9a84c" opacity="0.08"/>
+            <rect x="201" y="160" width="8" height="180" fill="#c9a84c" opacity="0.08"/>
+            <text x="150" y="198" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4a8a3a" letter-spacing="4">FOREST</text>
+            <text x="150" y="212" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#4a8a3a" letter-spacing="4">DYNASTY</text>
+            <line x1="150" y1="70" x2="150" y2="180" stroke="#2a4a1e" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="60" width="220" height="280" rx="4" fill="#0a1008"/>
+            <path d="M100 60 L80 120 L60 200 L80 200 L90 160 L90 340 L210 340 L210 160 L220 200 L240 200 L220 120 L200 60 Z" fill="#0c1408" stroke="#1a2e12" stroke-width="1"/>
+            <!-- Back: tree/nature motif -->
+            <path d="M150 155 L150 230" stroke="#4a8a3a" stroke-width="2" opacity="0.6"/>
+            <path d="M150 160 L130 178 M150 160 L170 178 M150 175 L128 195 M150 175 L172 195 M150 190 L125 215 M150 190 L175 215" stroke="#4a8a3a" stroke-width="1.5" opacity="0.5"/>
+            <text x="150" y="250" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="none" stroke="#4a8a3a" stroke-width="0.7" letter-spacing="2">DYNASTY</text>
+            <text x="150" y="265" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#3a6a2a" letter-spacing="4">FOREST EDITION</text>
+            <line x1="91" y1="160" x2="91" y2="340" stroke="#c9a84c" stroke-width="2" opacity="0.4"/>
+            <line x1="209" y1="160" x2="209" y2="340" stroke="#c9a84c" stroke-width="2" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(8,8,8,0.85);border:1px solid #2a4a1e;color:#4a8a3a;">FOREST</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">Tracksuit</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">FOREST SET</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$139</div>
+          <div class="flex gap-1">
+            <div class="size-dot">M</div>
+            <div class="size-dot">L</div>
+            <div class="size-dot">XL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 8: T-Shirt Arch -->
+    <div class="product-card stagger-in" data-category="tshirt" style="animation-delay:0.4s;">
+      <div class="card-img-wrap">
+        <div class="card-front">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0f0f0f"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#111" stroke="#222" stroke-width="1"/>
+            <!-- Oversized text graphic -->
+            <text x="150" y="195" text-anchor="middle" font-family="sans-serif" font-size="36" font-weight="900" fill="#1e1e1e" letter-spacing="-1">SD</text>
+            <text x="150" y="230" text-anchor="middle" font-family="sans-serif" font-size="7.5" fill="#c9a84c" letter-spacing="6">DYNASTY</text>
+            <line x1="110" y1="236" x2="190" y2="236" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="card-back">
+          <svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <rect width="300" height="400" fill="#1a1a1a"/>
+            <rect x="40" y="80" width="220" height="240" rx="4" fill="#0f0f0f"/>
+            <path d="M90 90 L60 130 L90 140 L90 310 L210 310 L210 140 L240 130 L210 90 Q190 100 170 95 Q150 88 130 95 Q110 100 90 90Z" fill="#111" stroke="#222" stroke-width="1"/>
+            <!-- Back: all-over monogram feel -->
+            <text x="150" y="185" text-anchor="middle" font-family="sans-serif" font-size="48" font-weight="900" fill="#1e1e1e">SD</text>
+            <text x="150" y="215" text-anchor="middle" font-family="sans-serif" font-size="12" fill="none" stroke="#c9a84c" stroke-width="0.5" letter-spacing="4">STREET DYNASTY</text>
+            <text x="150" y="230" text-anchor="middle" font-family="sans-serif" font-size="6.5" fill="#555" letter-spacing="4">MONOGRAM SERIES</text>
+          </svg>
+        </div>
+        <div class="card-badge" style="background:rgba(8,8,8,0.85);border:1px solid #c9a84c;color:#c9a84c;">MONO</div>
+        <div class="hover-cta">QUICK ADD</div>
+      </div>
+      <div class="p-4">
+        <div class="section-label text-xs mb-1" style="font-size:0.6rem;letter-spacing:0.2em;">T-Shirt</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:0.08em;color:#f0ede8;margin-bottom:8px;">MONOGRAM TEE</div>
+        <div class="flex items-center justify-between">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#c9a84c;letter-spacing:0.1em;">$69</div>
+          <div class="flex gap-1">
+            <div class="size-dot">XS</div>
+            <div class="size-dot">M</div>
+            <div class="size-dot">XL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end grid -->
+
+  <!-- Load more -->
+  <div class="flex justify-center mt-14">
+    <button style="cursor:none;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;letter-spacing:0.3em;font-weight:700;text-transform:uppercase;padding:14px 48px;border:1px solid #2a2a2a;color:#888;background:none;transition:all 0.3s ease;"
+      onmouseover="this.style.borderColor='#c9a84c';this.style.color='#c9a84c';this.style.background='rgba(201,168,76,0.05)'"
+      onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#888';this.style.background='none'">
+      Load More
+    </button>
+  </div>
+
+</section>
+
+<!-- MARQUEE 2 - reversed -->
+<div class="overflow-hidden border-y border-dynasty-border py-4 my-8" style="background:#0f0f0f;">
+  <div style="display:flex;width:max-content;animation:marquee 28s linear infinite reverse;">
+    <span style="font-family:'Bebas Neue',sans-serif;letter-spacing:0.1em;color:#1e1e1e;font-size:1.2rem;">
+      FREE RETURNS &nbsp;·&nbsp; WORLDWIDE SHIPPING &nbsp;·&nbsp; QUALITY GUARANTEED &nbsp;·&nbsp; DYNASTY OR NOTHING &nbsp;·&nbsp; HANDCRAFTED DETAILS &nbsp;·&nbsp; PREMIUM MATERIALS &nbsp;·&nbsp; STREET CULTURE &nbsp;·&nbsp; EST. 2019 &nbsp;·&nbsp;
+      FREE RETURNS &nbsp;·&nbsp; WORLDWIDE SHIPPING &nbsp;·&nbsp; QUALITY GUARANTEED &nbsp;·&nbsp; DYNASTY OR NOTHING &nbsp;·&nbsp; HANDCRAFTED DETAILS &nbsp;·&nbsp; PREMIUM MATERIALS &nbsp;·&nbsp; STREET CULTURE &nbsp;·&nbsp; EST. 2019 &nbsp;·&nbsp;
+    </span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="border-t border-dynasty-border px-6 md:px-12 py-16" style="background:#0a0a0a;">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+    <div class="col-span-2 md:col-span-1">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.15em;background:linear-gradient(135deg,#f0ede8,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;">
+        STREET DYNASTY
+      </div>
+      <p style="font-family:'Barlow',sans-serif;font-size:0.8rem;color:#555;line-height:1.7;max-width:220px;">
+        Crafted for the streets. Every piece built with intention, worn with purpose.
+      </p>
+      <div class="flex gap-4 mt-6">
+        <a href="#" class="nav-link" style="font-size:0.65rem;letter-spacing:0.2em;">IG</a>
+        <a href="#" class="nav-link" style="font-size:0.65rem;letter-spacing:0.2em;">TW</a>
+        <a href="#" class="nav-link" style="font-size:0.65rem;letter-spacing:0.2em;">TK</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;color:#c9a84c;text-transform:uppercase;margin-bottom:14px;">Shop</div>
+      <div class="flex flex-col gap-3">
+        <a href="#" class="nav-link" style="font-size:0.75rem;">New Arrivals</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Tracksuits</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">T-Shirts</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Limited Drops</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Archive</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;color:#c9a84c;text-transform:uppercase;margin-bottom:14px;">Info</div>
+      <div class="flex flex-col gap-3">
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Our Story</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Lookbook</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Sustainability</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Stockists</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.3em;color:#c9a84c;text-transform:uppercase;margin-bottom:14px;">Support</div>
+      <div class="flex flex-col gap-3">
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Size Guide</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Shipping</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Returns</a>
+        <a href="#" class="nav-link" style="font-size:0.75rem;">Contact</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="gold-line mb-6"></div>
+
+  <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:#333;">
+      © 2025 STREET DYNASTY. ALL RIGHTS RESERVED.
+    </div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:0.15em;color:#333;">
+      PRIVACY POLICY &nbsp;·&nbsp; TERMS OF SERVICE
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+  document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; cursor.style.left = mouseX + 'px'; cursor.style.top = mouseY + 'px'; });
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Stagger in on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const els = document.querySelectorAll('.stagger-in');
+    els.forEach((el, i) => {
+      const delay = parseFloat(el.style.animationDelay || 0) * 1000;
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.7s ease, transform 0.7s cubic-bezier(0.23,1,0.32,1)';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, 200 + delay);
+    });
+  });
+
+  // Intersection observer for grid cards
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.23,1,0.32,1), border-color 0.4s ease, box-shadow 0.4s ease';
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+
+  // Filter products
+  function filterProducts(category, btn) {
+    // Update tabs
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('#productGrid .product-card').forEach(card => {
+      const cats = card.dataset.category || '';
+      if (category === 'all' || cats.includes(category)) {
+        card.style.display = '';
+        setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 50);
+      } else {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(16px)';
+        setTimeout(() => { card.style.display = 'none'; }, 300);
+      }
+    });
+  }
+</script>
+</body>
+</html>
